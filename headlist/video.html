@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <script type="text/javascript" src="http://imasdk.googleapis.com/js/sdkloader/ima3.js"></script>
+    <script id="idhb" async type="text/javascript" src="./headerlist.min.js"></script> 
+    <script type="text/javascript" src="./prebid.min.js"></script>
+    
+    <script>
+        idhb = idhb || {};
+        idhb.que = idhb.que || [];
+    </script>
+
+    <script>
+        function requestAds() {
+            idhb.que.push(function() {
+                idhb.requestAds({
+                    slotIds: ["video1"],
+                    callback: function(vastUrl) {
+                        play(vastUrl)
+                        console.log(vastUrl)
+                    } 
+                });
+            });
+        }
+
+        // Google IMA SDK
+        function play(vastUrl) {
+            var videoPlayer = document.getElementById('player1');
+            var adSlot = document.getElementById('video1');
+
+            // Instantiate IMA specific objects
+            var adDisplayContainer = new google.ima.AdDisplayContainer(
+                adSlot,
+                videoPlayer
+            );
+            adDisplayContainer.initialize();
+            adsLoader = new google.ima.AdsLoader(adDisplayContainer);
+            adsLoader.addEventListener(
+                google.ima.AdsManagerLoadedEvent.Type.ADS_MANAGER_LOADED,
+                onAdsManagerLoaded,
+                false
+            );
+            function onAdsManagerLoaded(adsManagerLoadedEvent) {
+                adsManager = adsManagerLoadedEvent.getAdsManager(videoPlayer);
+
+                try {
+                    adsManager.init(640, 480, google.ima.ViewMode.NORMAL);
+                    adsManager.start();
+                } catch (adError) { console.log(adError); }
+            }
+
+            var adsRequest = new google.ima.AdsRequest();
+            adsRequest.adTagUrl = vastUrl;
+            adsLoader.requestAds(adsRequest);
+        }
+    </script>
+</head>
+
+<body>
+    <h2>HeaderLift - Video</h2>
+    <div>
+        <button onclick="requestAds()">Request Ad</button>
+    </div>
+    <div id='video1'>
+        <video id="player1">
+        </video>
+    </div>
+</body>
+
+</html>
